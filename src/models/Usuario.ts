@@ -30,16 +30,16 @@ export class Usuario {
   @Column()
   cpf!: string;
 
-  @Column({name: "nascimento", type: "datetime"})
+  @Column({name: "dataNascimento", type: "datetime"})
   dataNascimento!: Date;
 
   @OneToMany(() => UsuarioTermo, (condicao) => condicao.usuario, {onDelete: "CASCADE"})
-  condicoes!: UsuarioTermo[];
+  condicoes!: UsuarioTermo;
 
   @ManyToOne(() => Usuario, (responsavel) => responsavel.usuario, { onDelete: "CASCADE"})
   @JoinTable()
   responsavel!: Usuario;
 
   @OneToMany(() => Usuario, (usuario) => usuario.responsavel , { onDelete: "CASCADE"})
-  usuario!: Usuario[];
+  usuario!: Usuario;
 }

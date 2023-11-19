@@ -1,0 +1,14 @@
+{
+  "extensions.autoUpdate": true,
+  "extensions.autoCheckUpdates": true,
+  "extensions.ignoreRecommendations": false,
+  "eslint.alwaysShowStatus": true,
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "prettier.eslintIntegration": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.eslint": true
+  }
+}

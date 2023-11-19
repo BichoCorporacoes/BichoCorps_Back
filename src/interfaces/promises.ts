@@ -1,5 +1,6 @@
 export interface IPromiseResponse {
-  data: any;
-  isError: boolean;
-  msg: string;
+   data: any;
+   isError: boolean;
+   msg: string;
+   msgError?: string;
 }

@@ -17,10 +17,11 @@ export class UsuarioTermo {
   @CreateDateColumn({
     name: "uso_condicao",
     nullable: false,
+    default: () => "CURRENT_TIMESTAMP(6)",
     type: "datetime",
   })
   uso_condicao!: Date;
-
+  
   @Column({
     name: "markting_comunicaoo",
     type: "boolean",
