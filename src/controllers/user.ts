@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { ICreateUsuario } from "../interfaces/usuario";
+import { ICreateUsuario, RequestLogin } from "../interfaces/usuario";
 import serviceUser from "../service/userService";
 import { IReqTermos } from "../interfaces/termos";
 import * as childProcess from "child_process";
 import dumpService from "../service/dumpService";
-
+import * as jwt from "jsonwebtoken";
 class UserController {
    private static isAdult(birthDate: Date): boolean {
       const eighteenYearsAgo = new Date();
@@ -15,6 +15,24 @@ class UserController {
          age > 0 ||
          (age === 0 && eighteenYearsAgo.getMonth() >= newDate.getMonth() && eighteenYearsAgo.getDate() >= newDate.getDate())
       );
+   }
+
+   public async UserLogin(req: Request, res: Response) {
+      const data: RequestLogin = req.body;
+      const mandatoryProperties: (keyof RequestLogin)[] = ["email", "senha"];
+      const allPresentProperties = mandatoryProperties.every(
+         (properties) => data[properties] !== undefined && data[properties] !== null,
+      );
+      if (!allPresentProperties) {
+         return res.status(400).json({
+            isError: true,
+            data: null,
+            msg: "Por favor, insira todos os valores obrigatórios do usuário.",
+         });
+      }
+      const user = await serviceUser.getUserByEmail(data.email, data.senha);
+      const token = jwt.sign({ id: user.data.id }, "BichoCorps", { expiresIn: "1D" });
+      return res.json({ ...user, token });
    }
 
    public async CreateUser(req: Request, res: Response) {

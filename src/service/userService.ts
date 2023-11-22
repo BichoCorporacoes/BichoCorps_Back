@@ -124,6 +124,31 @@ class UserService {
       }
    }
 
+   public async getUserByEmail(email: string, senha: string): Promise<IPromiseResponse> {
+      try {
+         const getEmail = await this.repository.findOne({ where: { email: email, senha: senha } });
+         if (!getEmail) {
+            return {
+               data: null,
+               isError: false,
+               msg: "Usuario não encontrado",
+            };
+         }
+         return {
+            data: getEmail,
+            isError: false,
+            msg: "",
+         };
+      } catch (error: any) {
+         return {
+            data: "",
+            isError: false,
+            msg: "",
+            msgError: error,
+         };
+      }
+   }
+
    public async createUser(
       user: ICreateUsuario,
       termos: IReqTermos,
