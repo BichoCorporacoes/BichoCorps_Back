@@ -18,7 +18,15 @@ interface IUsuarioResponsavel {
    usuario?: IUsuario;
 }
 
-interface IUsuario {
+interface IResponsavel {
+   nome: string;
+   nick: string;
+   email: string;
+   senha: string;
+   cpf: string;
+   dataNascimento: Date;
+}
+export interface IUsuario {
    nome: string;
    nick: string;
    email: string;

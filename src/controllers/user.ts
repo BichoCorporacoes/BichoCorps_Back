@@ -5,6 +5,8 @@ import { IReqTermos } from "../interfaces/termos";
 import * as childProcess from "child_process";
 import dumpService from "../service/dumpService";
 import * as jwt from "jsonwebtoken";
+import * as bcrypt from "bcrypt";
+
 class UserController {
    private static isAdult(birthDate: Date): boolean {
       const eighteenYearsAgo = new Date();
@@ -30,7 +32,15 @@ class UserController {
             msg: "Por favor, insira todos os valores obrigatórios do usuário.",
          });
       }
-      const user = await serviceUser.getUserByEmail(data.email, data.senha);
+      const user = await serviceUser.getUserByEmail(data.email);
+      if (user.data == null) return res.json(user);
+
+      const isPasswordValid = await bcrypt.compare(data.senha, user.data.senha);
+
+      if (!isPasswordValid) {
+         return res.status(401).json({ error: "Por favor, cheque as suas credenciais e tente novamenete." });
+      }
+
       const token = jwt.sign({ id: user.data.id }, "BichoCorps", { expiresIn: "1D" });
       return res.json({ ...user, token });
    }
@@ -137,13 +147,13 @@ class UserController {
                data: null,
             });
          }
-         if (files.mimetype !== "application/x-sql") {
-            return res.status(400).json({
-               isError: true,
-               msg: "Formato não permitido",
-               data: null,
-            });
-         }
+         // if (files.mimetype !== "application/x-sql") {
+         //    return res.status(400).json({
+         //       isError: true,
+         //       msg: "Formato não permitido",
+         //       data: null,
+         //    });
+         // }
          const data = await dumpService.restoreDatabase(files);
          if (data?.isError) {
             return res.status(400).json(data);

@@ -140,7 +140,7 @@ class DumpService {
       await uploadBytesResumable(storageRef, fileData);
       const uploadTask = uploadBytesResumable(storageRef, fileData.buffer);
       const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-      fs.unlinkSync(filePath);
+      // fs.unlinkSync(filePath);
       return downloadURL;
    }
 

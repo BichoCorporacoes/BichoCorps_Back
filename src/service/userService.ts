@@ -6,6 +6,7 @@ import { IPromiseResponse } from "../interfaces/promises";
 import { IReqTermos } from "../interfaces/termos";
 import { addDoc, arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../config/firebase";
+import * as bcrypt from "bcrypt";
 
 class UserService {
    private repository: Repository<Usuario>;
@@ -21,6 +22,9 @@ class UserService {
    private async createResponsavel(responsavel: ICreateUsuario): Promise<number> {
       const repositorio = this.repository;
       try {
+         const getRespEmail = await this.getUserByEmail(responsavel.email);
+         if (getRespEmail.data) return 0;
+         responsavel.senha = bcrypt.hashSync(responsavel.senha, bcrypt.genSaltSync(15));
          const insert = repositorio.create(responsavel);
          const resp = await repositorio.save(insert);
          return resp.id;
@@ -81,6 +85,7 @@ class UserService {
          },
          where: {},
       });
+      console.log(termos);
       const data = {
          uso_condicao: termos.uso_condicao,
          markting_comunicaoo: termos.markting_comunicaoo,
@@ -124,16 +129,17 @@ class UserService {
       }
    }
 
-   public async getUserByEmail(email: string, senha: string): Promise<IPromiseResponse> {
+   public async getUserByEmail(email: string): Promise<IPromiseResponse> {
       try {
-         const getEmail = await this.repository.findOne({ where: { email: email, senha: senha } });
+         const getEmail = await this.repository.findOne({ where: { email: email } });
          if (!getEmail) {
             return {
                data: null,
-               isError: false,
+               isError: true,
                msg: "Usuario não encontrado",
             };
          }
+
          return {
             data: getEmail,
             isError: false,
@@ -157,12 +163,18 @@ class UserService {
       const repositorio = this.repository;
       try {
          let respId: number | undefined;
+         const userEmail = await this.getUserByEmail(user.email);
+
+         if (userEmail.data) return { data: null, msg: "Email já em uso", isError: true };
          if (responsavel) respId = await this.createResponsavel(responsavel);
+         if (respId == 0) return { data: null, msg: "Email do responsavel já em uso", isError: true };
+
+         const hashPassword = bcrypt.hashSync(user.senha, bcrypt.genSaltSync(15));
          const userEntity = this.repository.create({
             nome: user.nome,
             nick: user.nick,
             email: user.email,
-            senha: user.senha,
+            senha: hashPassword,
             cpf: user.cpf,
             dataNascimento: user.dataNascimento,
             responsavel: respId
@@ -171,6 +183,7 @@ class UserService {
                  }
                : undefined,
          });
+
          await repositorio.save(userEntity);
          await this.createTermo(userEntity.id, termos, respId);
          return {

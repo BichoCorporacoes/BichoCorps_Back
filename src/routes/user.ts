@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 user.post("/CreateUser", userController.CreateUser);
-user.use(auth);
+// user.use(auth);
 user.delete("/DeleteUser/:usuarioId", userController.Deleteuser);
 user.get("/ReadOnlyUser/:id", userController.ReadOnlyUserId);
 user.get("/createBackUp", userController.CreateBackUp);
