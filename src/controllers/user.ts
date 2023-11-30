@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ICreateUsuario, RequestLogin } from "../interfaces/usuario";
 import serviceUser from "../service/userService";
-import { IReqTermos } from "../interfaces/termos";
+import { IReqTermoUpdate, IReqTermos } from "../interfaces/termos";
 import * as childProcess from "child_process";
 import dumpService from "../service/dumpService";
 import * as jwt from "jsonwebtoken";
@@ -162,6 +162,12 @@ class UserController {
       } catch (error) {
          res.status(400).json(error);
       }
+   }
+   public async UpdateTermo(req: Request, res: Response) {
+      const { id } = req.params;
+      const body: IReqTermoUpdate = req.body;
+      await serviceUser.UpdateUserTerm(Number(id), body);
+      return res.status(200).json("Atualizado");
    }
 }
 

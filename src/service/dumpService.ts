@@ -182,6 +182,8 @@ class DumpService {
       }
       const queryRunner = DataBaseSource.createQueryRunner();
       const tableSections = await this.findTableSections("usuario", sqlContent);
+      console.log(tableSections);
+      let index = 0;
       try {
          await queryRunner.startTransaction();
          for (let section of tableSections) {
@@ -189,8 +191,9 @@ class DumpService {
                .split("\n")
                .filter((line) => !line.trim().startsWith("--"))
                .join("\n");
+            // console.log(section, index++);
             if (section.trim() !== "") {
-               await queryRunner.query(section);
+               // await queryRunner.query(section);
             }
          }
          await queryRunner.commitTransaction();

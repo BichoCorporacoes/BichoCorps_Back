@@ -11,6 +11,7 @@ user.post("/CreateUser", userController.CreateUser);
 user.delete("/DeleteUser/:usuarioId", userController.Deleteuser);
 user.get("/ReadOnlyUser/:id", userController.ReadOnlyUserId);
 user.get("/createBackUp", userController.CreateBackUp);
+user.put("/updateTermo/:id", userController.UpdateTermo);
 user.post("/restoreUp", upload.single("files"), userController.RestoreUp);
 
 export default user;

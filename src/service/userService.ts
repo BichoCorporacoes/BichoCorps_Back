@@ -3,21 +3,22 @@ import { DataBaseSource } from "../config/database";
 import { Deletados, Termos, Usuario, UsuarioTermo } from "../models";
 import { ICreateUsuario } from "../interfaces/usuario";
 import { IPromiseResponse } from "../interfaces/promises";
-import { IReqTermos } from "../interfaces/termos";
+import { IReqTermoUpdate, IReqTermos } from "../interfaces/termos";
 import { addDoc, arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
 import { db, storage } from "../config/firebase";
 import * as bcrypt from "bcrypt";
+import { Log } from "../models/Log";
 
 class UserService {
    private repository: Repository<Usuario>;
    private usuarioTermoRepository: Repository<UsuarioTermo>;
    private termoRepository: Repository<Termos>;
-   private deletedRepository: Repository<Deletados>;
+   private logRepositorio: Repository<Log>;
    constructor() {
       this.repository = DataBaseSource.getRepository(Usuario);
       this.usuarioTermoRepository = DataBaseSource.getRepository(UsuarioTermo);
       this.termoRepository = DataBaseSource.getRepository(Termos);
-      this.deletedRepository = DataBaseSource.getRepository(Deletados);
+      this.logRepositorio = DataBaseSource.getRepository(Log);
    }
    private async createResponsavel(responsavel: ICreateUsuario): Promise<number> {
       const repositorio = this.repository;
@@ -197,6 +198,38 @@ class UserService {
             isError: true,
             msg: `Erro ao cadastrar o usuário: ${error.message || error}`,
          };
+      }
+   }
+
+   public async UpdateUserTerm(id: number, body: IReqTermoUpdate) {
+      const selectUser = await this.usuarioTermoRepository.findOne({ where: { usuario: { id: id } } });
+      let log = "";
+      let validar = false;
+      if (body.markting_atualizacao !== selectUser?.markting_atualizacao) {
+         log += `Marketing Atualização Atualizado, Definido como: ${body.markting_atualizacao} Dia ${new Date()}\n`;
+         validar = true;
+      }
+      if (body.markting_comunicaoo !== selectUser?.markting_comunicaoo) {
+         log += `Marketing Comunicação Atualizado, Definido como: ${body.markting_atualizacao} Dia ${new Date()}`;
+         validar = true;
+      }
+      const att =
+         body.markting_atualizacao === selectUser?.markting_atualizacao
+            ? selectUser?.markting_atualizacao
+            : body.markting_atualizacao;
+      const com =
+         body.markting_comunicaoo === selectUser?.markting_comunicaoo
+            ? selectUser?.markting_comunicaoo
+            : body.markting_comunicaoo;
+      await this.usuarioTermoRepository.update(Number(selectUser?.id), {
+         markting_atualizacao: att,
+         markting_comunicaoo: com,
+      });
+
+      if (validar) {
+         const insert = this.logRepositorio.create({ usuario: { id: id }, msg: log });
+         await this.logRepositorio.save(insert);
+         await DataBaseSource.getRepository("logs_usuario_usuario").insert({ logsId: insert.id, usuarioId: id });
       }
    }
 }
